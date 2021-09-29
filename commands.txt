@@ -1,0 +1,37 @@
+javac --module-path mods -d testmodules testmodules/ru/example/testmodules/*.java testmodules/module-info.java
+
+
+javac -cp ./mods/* -d anothermodule anothermodule/ru/example/users/firstuser/*.java anothermodule/ru/example/users/seconduser/*.java
+
+
+javac -p mods \
+-d anothermodule \
+anothermodule/ru/example/users/firstuser/*.java \
+anothermodule/ru/example/users/seconduser/*.java \
+anothermodule/module-info.java 
+
+
+
+        
+        расположение модулей                              разделитель               имя класса
+
+java --module-path testmodules --module ru.example.testmodules/ru.example.testmodules.CommonJob
+
+                                            имя модуля                имя пакета
+											
+											
+jar -cvf mods/ru.example.testmodules.jar -C testmodules/ .
+
+jar -cvf mods/ru.example.users.jar -C anothermodule/ .
+
+
+
+
+
+
+
+
+
+
+
+

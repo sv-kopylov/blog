@@ -1,0 +1,35 @@
+Структура папок
+Серийный номер тома: A674-71B9
+E:.
+|   struct.txt
+|   
++---anothermodule
+|   |   module-info.class
+|   |   module-info.java
+|   |   sruc.txt
+|   |   
+|   \---ru
+|       \---example
+|           \---users
+|               +---firstuser
+|               |       FirstUser.class
+|               |       FirstUser.java
+|               |       
+|               \---seconduser
+|                       SecondUser.class
+|                       SecondUser.java
+|                       
++---mods
+|       ru.example.testmodules.jar
+|       ru.example.users.jar
+|       
+\---testmodules
+    |   module-info.class
+    |   module-info.java
+    |   
+    \---ru
+        \---example
+            \---testmodules
+                    CommonJob.class
+                    CommonJob.java
+                    

@@ -1,0 +1,18 @@
+Структура папок
+Серийный номер тома: A674-71B9
+E:.
+|   module-info.class
+|   module-info.java
+|   sruc.txt
+|   
+\---ru
+    \---example
+        \---users
+            +---firstuser
+            |       FirstUser.class
+            |       FirstUser.java
+            |       
+            \---seconduser
+                    SecondUser.class
+                    SecondUser.java
+                    

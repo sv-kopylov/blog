@@ -1,0 +1,2 @@
+1) параметры для курасивых таблиц html:
+<table cellspacing = 0 border = 1>

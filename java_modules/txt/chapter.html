@@ -1,0 +1,351 @@
+<p><strong>JPMS Java Platform Module System. Modules. Часть 1.</strong></p>
+<p><strong>Общие сведения</strong></p>
+<ul>
+<li><p>Появились в Java 9. Главная цель - предоставить функциональность группировки
+пакетов (здесь и далее пакет === package).</p>
+</li>
+<li><p>Похожи на JAR, но разработчик может выбирать какие пакеты доступны из за
+пределов модуля.</p>
+</li>
+</ul>
+<p><strong>JPMS включает следующее:</strong></p>
+<ol>
+<li><p>Формат для файлов JAR модуля</p>
+</li>
+<li><p>Разбивка JDK на модули</p>
+</li>
+<li><p>Дополнительные опции для командной строки</p>
+</li>
+</ol>
+<p><strong>Для чего все затевалось</strong></p>
+<ol>
+<li><p>Дополнительный (пятый) уровень access control (public, proteckted, default,
+private). Нужен если возникнет необходимость разрешить доступ к package из
+другого package и запретить всем остальным.</p>
+</li>
+<li><p>Более прозрачное управления зависимостями.</p>
+</li>
+<li><p>Если используется полностью модульное окружение, то есть твое приложение и
+все при используемые библиотеки будут определены в файле module-info.java, и
+в classpath не будет требуемой зависимотси, то Java начнет ругаться при
+запуске, а не когда то там в рантайме, при загрузке класса, которого нет.</p>
+</li>
+<li><p>Кастомные сборки Java: - JPMS позволяет разработчику указать только те
+модули из JRE, которые требуются для приложения. Это позволяет с одной
+стороны сократить размер конечной поставки, а с другой стороны запускать его
+без установленной JRE. см jlink.</p>
+</li>
+<li><p>Сокращение времени загрузки классов.</p>
+</li>
+<li><p>Принуждение к выбору уникальных имен для packages. Каждый package может
+поставляться только одним модулем.</p>
+</li>
+</ol>
+<p><strong>Основные понятия</strong></p>
+<p>Module - группа из одного или более пакетов плюс специальный файл
+module-info.java.</p>
+<p><strong>Пример</strong></p>
+<p><img src="https://1.bp.blogspot.com/-8qLdcX_2Jjw/YUCXMvfVq5I/AAAAAAAAAz4/wkRAHwNxPSovqgDWfOIBPDQvPy2sZrxsACNcBGAsYHQ/w596-h640/%25D0%25BC%25D0%25BE%25D0%25B4%25D1%2583%25D0%25BB%25D0%25B8_%25D0%25B4%25D0%25B5%25D1%2580%25D0%25B5%25D0%25B2%25D0%25BE1.jpg" alt="https://1.bp.blogspot.com/-8qLdcX_2Jjw/YUCXMvfVq5I/AAAAAAAAAz4/wkRAHwNxPSovqgDWfOIBPDQvPy2sZrxsACNcBGAsYHQ/w596-h640/%25D0%25BC%25D0%25BE%25D0%25B4%25D1%2583%25D0%25BB%25D0%25B8_%25D0%25B4%25D0%25B5%25D1%2580%25D0%25B5%25D0%25B2%25D0%25BE1.jpg" /></p>
+<p>Содержание module-info.java (более подробный разбор этого файла ниже)</p>
+<pre><code>module ru.example.testmodules{
+    exports ru.example.testmodules;
+}
+</code></pre>
+<p><strong>Команда для компиляции</strong></p>
+<pre><code>javac --module-path mods \
+    -d testmodules testmodules/ru/example/testmodules/*.java  \
+       testmodules/module-info.java
+</code></pre>
+<p>Команда вызывается из рута (рис. выше)</p>
+<p><strong>опция -d</strong> - определяет директорию в которую складывать .class - файлы.
+Результатом будет module-info.<strong>class</strong> файл рядом с module-info.<strong>java,</strong> и
+CommonJob.<strong>class</strong> рядом с CommonJob.<strong>java.</strong></p>
+<p><strong>опция --module-path</strong> определяет расположение любых файлов других модулей.</p>
+<p><strong>module-path</strong> можно представить себе как classpath для модульной программы.</p>
+<p>Краткая замена для <strong>--module-path === -p</strong></p>
+<p><strong>Команда для запуска</strong></p>
+<p><img src="https://1.bp.blogspot.com/-I2CALDWDYoE/YT8YhfXs3JI/AAAAAAAAAzo/rBqektLA-hQp-G4iCg1vYQoSvBXx60lFwCNcBGAsYHQ/w640-h72/run_prompt.PNG" alt="https://1.bp.blogspot.com/-I2CALDWDYoE/YT8YhfXs3JI/AAAAAAAAAzo/rBqektLA-hQp-G4iCg1vYQoSvBXx60lFwCNcBGAsYHQ/w640-h72/run_prompt.PNG" /></p>
+<p>тут также можно использовать сокращения</p>
+<p><strong>--module-path === -p</strong></p>
+<p><strong>--module === -m</strong></p>
+<p><strong>Сборка jar:</strong></p>
+<pre><code>jar -cvf mods/ru.example.testmodules.jar -C testmodules/ .
+</code></pre>
+<p>ничем не отличается от обычной сборки jar.</p>
+<h3 id="section">Версионность модуля</h3>
+<p><strong>--module-version -</strong> дополнительный аргумент</p>
+<h3 id="jar">Рисунок &quot;что получилось после сборки модуля и сборки jar&quot;</h3>
+<p>|</br>
++---mods</br>
+| ru.example.testmodules.jar</br>
+|</br>
+\---testmodules</br>
+&nbsp;&nbsp;&nbsp;| module-info.class</br>
+&nbsp;&nbsp;&nbsp;| module-info.java</br>
+&nbsp;&nbsp;&nbsp;|</br>
+&nbsp;&nbsp;&nbsp;\---ru</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---example</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---testmodules</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CommonJob.class</p>
+
+<h3 id="section-1">Второй модуль использующий первый</h3>
+<p>Сразу рисунок того, что получилось:</p>
+<p>|</br>
++---mods</br>
+&nbsp;&nbsp;&nbsp;| ru.example.testmodules.jar</br>
+&nbsp;&nbsp;&nbsp;| ru.example.users.jar</br>
+&nbsp;&nbsp;&nbsp;|</br>
+&nbsp;&nbsp;&nbsp;+---anothermodule</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| module-info.class</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| module-info.java</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---ru</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---example</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---users</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+---firstuser</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| FirstUser.class</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| FirstUser.java</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\---seconduser</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|SecondUser.class</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|SecondUser.java</br></p>
+<p>Перед сборкой второго и вообще любого модуля нужно чтобы все требуемые
+зависимости были собраны, а их расположение указанно в аргументе <strong>--module-path
+(-p).</strong></p>
+<h3 id="module-info.java">Файл module-info.java для второго модуля:</h3>
+<pre><code>module ru.example.users{ // ru.example.users это название модуля, совпадает с началом пакета
+   exports ru.example.users.firstuser; // пакет, который торчит наружу из модуля, их м.б. несколько
+   requires ru.example.testmodules; // пакет, от которого зависит модуль, их м.б. несколько
+}
+</code></pre>
+<h3 id="section-2">Команды для сборки второго модуля:</h3>
+<ol>
+<li>Сборка классов</li>
+</ol>
+<pre><code>javac -cp ./mods/* -d anothermodule anothermodule/ru/example/users/firstuser/*.java anothermodule/ru/example/users/seconduser/*.java
+</code></pre>
+<ol start="2">
+<li>Сборка модуля</li>
+</ol>
+<pre><code>javac -p mods \
+&nbsp;&nbsp;&nbsp;-d anothermodule \
+&nbsp;&nbsp;&nbsp;anothermodule/ru/example/users/firstuser/*.java \
+&nbsp;&nbsp;&nbsp;anothermodule/ru/example/users/seconduser/*.java \
+&nbsp;&nbsp;&nbsp;anothermodule/module-info.java
+</code></pre>
+<ol start="3">
+<li>Сборка jar</li>
+</ol>
+<pre><code>jar -cvf mods/ru.example.users.jar -C anothermodule/ . 
+</code></pre>
+<p><strong>Файл module-info.java, правила.</strong></p>
+<ul>
+<li><p>Файл может быть пустым, в этом случае компилятор не будет создавать .class -
+файл.</p>
+</li>
+<li><p>Файл должен быть в руте модуля (см. рисунок выше), обычные файлы - в
+пакетах.</p>
+</li>
+<li><p>Файл должен использовать ключевое слово <strong>module.</strong></p>
+</li>
+<li><p>Имя модуля следует правилам именования пакетов.</p>
+</li>
+</ul>
+<p><strong>Ключевые слова exports, requires, provides, uses, opens.</strong></p>
+<p><em>Ключевые слова - не совсем точный термин, так как java не добавляет новых
+ключевых слов для обратной совместимости, поэтому в обычных классах
+перечисленные слова могут использоваться как идентификаторы. И только для
+module-info.java файла эти слова являются &quot;ключевыми&quot;, потому что раньше не было
+никаких модулей. Эти ключевые слова по правильному называются</em> <strong>directives</strong>*.*</p>
+<p><strong>exports</strong></p>
+<p>Используется для того, чтобы показать, что модуль &quot;светит&quot;, делает доступным
+какой то пакет для других модулей.</p>
+<p><img src="https://lh3.googleusercontent.com/-4i9six7gV08/YUN_CTVk-ZI/AAAAAAAAA0U/FtzYAG1KG6swZrsJMtiXQJw4gT-eOFV5wCNcBGAsYHQ/s16000/image.png" alt="https://lh3.googleusercontent.com/-4i9six7gV08/YUN_CTVk-ZI/AAAAAAAAA0U/FtzYAG1KG6swZrsJMtiXQJw4gT-eOFV5wCNcBGAsYHQ/s16000/image.png" /></p>
+<p>также возможно экспортировать пакет для конкретного модуля</p>
+<p><img src="https://lh3.googleusercontent.com/-wKbLuAB4H_g/YUN_bzbLDPI/AAAAAAAAA0c/iZgn8kT0XdYDrx7M0jYk51IhXeXYmxoAQCNcBGAsYHQ/s16000/image.png" alt="https://lh3.googleusercontent.com/-wKbLuAB4H_g/YUN_bzbLDPI/AAAAAAAAA0c/iZgn8kT0XdYDrx7M0jYk51IhXeXYmxoAQCNcBGAsYHQ/s16000/image.png" /></p>
+<p><strong>requires</strong></p>
+<p>Указывает что данный модуль зависит от другого.</p>
+<p><img src="https://1.bp.blogspot.com/-3ire10Ie_fs/YUOSB9AJXzI/AAAAAAAAA0w/fMRHe-K76FUuKX0238ExYtKaVRhEZ2YUQCPcBGAYYCw/s16000/image.png" alt="https://lh3.googleusercontent.com/-W4LveYa8pn0/YUOBo6mHG-I/AAAAAAAAA0k/sGt5RfI7vHweDyOqytpf7SsUkjFERSTZgCNcBGAsYHQ/s16000/image.png" /></p>
+<p><strong>requires transitive</strong> moduleName означает, что любой модуль, который зависит
+от данного модуля, также зависит от модуля moduleName. Таким образом, этот
+внешний модуль, который зависит от нашего текущего пакета может не декларировать
+то, что ему также требуется moduleName.</p>
+<p>пример:</p>
+<p>provides ru.example.SomeAPI with ru.example.SomeImpl</p>
+<p>более посдробно во второй части.</p>
+<h3 id="uses">uses</h3>
+<p>указывает, что модуль зависит от сервиса.</p>
+<p>пример:</p>
+<pre><code>uses ru.example.SomeAPI 
+</code></pre>
+<h3 id="opens">opens</h3>
+<p>нужен для того, чтобы явно разрешать использование рефлексии всем или
+конкретному другому модулю.</p>
+<p>пример:</p>
+<pre><code>opens ru.example.users 
+opens ru.example.users  to ru.example.testmodules
+</code></pre>
+<h2 id="section-3">Просмотр модулей</h2>
+<p>В Java 9 были добавлены опции командной строки для просмотра и описания модулей
+и их внутренностей. Опции предусмотрены для команд <strong>java, jar.</strong></p>
+<h2 id="java">Опции для команды java</h2>
+<h3 id="section-4">Описание модуля</h3>
+<pre><code>java -p mods -d ru.example.testmodules // название модуля
+</code></pre>
+<p>или</p>
+<pre><code>java -p mods --describe-module ru.example.testmodules // название модуля
+</code></pre>
+<p>команды выводят информацию о модулях, например:</p>
+<pre><code>$ java -p mods -d ru.example.testmodules 
+ru.example.testmodules file:///E:/blog/code_examples/mods/ru.example.testmodules.jar
+exports ru.example.testmodules requires java.base mandated
+</code></pre>
+<p><strong>java.base</strong> - специальный модуль, он автоматически добавляется как зависимость
+ко всем модулям без исключения.</p>
+<h3 id="section-5">Перечисление доступных модулей</h3>
+<pre><code>java --list-modules 
+</code></pre>
+<p>перечисляет стандартные модули java модули Всего в поставке из около 70</p>
+<pre><code>java -p mods --list-modules 
+</code></pre>
+<p>перечисляет стандартные модули java модули, и модули в папке mods</p>
+<h3 id="section-6">Максимально подробное описание</h3>
+<p>В команду запуска (см. команда запуска) добавить аргумент
+-–show-module-resolution</p>
+<pre><code>java \
+        --module-path mods \
+        --show-module-resolution \
+        --module ru.example.testmodules \
+         ru.example.testmodules.CommonJob
+</code></pre>
+<p>Для анализа вывода этой команды нужна еще одна статься TODO.</p>
+<h2 id="jar-1">Опции для команды jar</h2>
+<h3 id="section-7">Описание модуля:</h3>
+<p><code>jar -f mods/ru.example.testmodules.jar –d</code></p>
+<p><code>jar --file mods/ru.example.testmodules.jar --describe-module</code></p>
+<p>вывод</p>
+<pre><code>ru.example.testmodules jar:file:///E:/blog/code_examples/mods/ru.example.testmodules.jar/!module-info.class
+exports ru.example.testmodules
+requires java.base mandated
+</code></pre>
+<h2 id="jdeps">Команда jdeps</h2>
+<p>Дает инфо о зависимостях внутри модуля. Утилита смотрит в код, поэтому сообщает
+о том, какие зависимости реально используются, а не просто задекларированы.</p>
+<pre><code>jdeps -s mods/ru.example.testmodules.jar 
+jdeps -summary mods/ru.example.testmodules.jar
+</code></pre>
+<p>Если не использовать –summary/ -s то описание будет более подробно (какие пакеты
+используются в каком модуле).</p>
+<p>Если в модуле используются не только стандартные модули – то нужно указывать к
+ним путь, с помощью опции <strong>--module-path</strong>, для jdeps краткой формы этой опции
+не существует.</p>
+<pre><code>jdeps \
+--module-path mods \
+mods/ru.example.users.jar
+</code></pre>
+<h2 id="jmod">Команда jmod</h2>
+<p>JMOD – файл это файл java – модуля. Есть рекомендация для файлов java-модулей
+использовать jar – файлы, и только если используются нативные библиотеки (dll
+или so) – использовать JMOD – файлы.</p>
+<p>Режимы работы:</p>
+<table cellspacing = 0 border = 1>
+<thead>
+<tr>
+<th><strong>Операция</strong></th>
+<th><strong>Описание</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>Создание JMOD – файла</td>
+</tr>
+<tr>
+<td>extract</td>
+<td>Работает как unzip</td>
+</tr>
+<tr>
+<td>describe</td>
+<td>Печатает всякие подробности, такие как requires</td>
+</tr>
+<tr>
+<td>list</td>
+<td>Печатает все файлы изнутря JMOD – файла</td>
+</tr>
+<tr>
+<td>hash</td>
+<td>Печатает hash</td>
+</tr>
+</tbody>
+</table>
+<p>Таблица некоторых полезных команд:</p>
+<table cellspacing = 0 border = 1>
+<thead>
+<tr>
+<th><strong>Описание</strong></th>
+<th><strong>Синтаксис</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Компиляция не модульного кода</td>
+<td>javac -cp classpath -d directory classesToCompile</td>
+</tr>
+<tr>
+<td>Запуск не модульного кода</td>
+<td>java -cp classpath package.className </td>
+</tr>
+<tr>
+<td></td>
+<td>-cp == -classpath == --class-path</td>
+</tr>
+<tr>
+<td>Компиляция модуля</td>
+<td>jvac --module-path moduleFolderName -d directory classesToCompileIncludingModuleInfo</td>
+</tr>
+<tr>
+<td></td>
+<td>--module-path == -p</td>
+</tr>
+<tr>
+<td>Запуск модуля</td>
+<td>java --module-path moduleFolderName --module moduleName/package.className</td>
+</tr>
+<tr>
+<td></td>
+<td>--module-path == -p --module == -m</td>
+</tr>
+<tr>
+<td>Описание модуля</td>
+<td>java --module-path moduleFolderName moduleName jar--describe-module --file jarName --describe-module</td>
+</tr>
+<tr>
+<td></td>
+<td>--module-path == -p --describe-module == -d --file == -f</td>
+</tr>
+<tr>
+<td>Перечислить доступные модули</td>
+<td>java --list-modules java --module-path moduleFolderName --list-modules</td>
+</tr>
+<tr>
+<td></td>
+<td>--module-path == -p</td>
+</tr>
+<tr>
+<td>Посмотреть зависимости</td>
+<td>jdeps -summary --module-path moduleFolderName jarName</td>
+</tr>
+<tr>
+<td></td>
+<td>-summary == -s --module-path != -p (нельзя)</td>
+</tr>
+<tr>
+<td>Подробное описание модуля при запуске</td>
+<td>java \ --module-path mods \ --show-module-resolution \ --module module.name \ full.class.Name</td>
+</tr>
+<tr>
+<td></td>
+<td>--module-path == -p --module == -m</td>
+</tr>
+</tbody>
+</table>

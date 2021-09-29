@@ -1,0 +1,164 @@
+<h2 id="section">Просмотр модулей</h2>
+<p>В Java 9 были добавлены опции командной строки для просмотра и описания модулей
+и их внутренностей. Опции предусмотрены для команд <strong>java, jar.</strong></p>
+<h2 id="java">Опции для команды java</h2>
+<h3 id="section-1">Описание модуля</h3>
+<pre><code>java -p mods -d ru.example.testmodules // название модуля
+</code></pre>
+<p>или</p>
+<pre><code>java -p mods --describe-module ru.example.testmodules // название модуля
+</code></pre>
+<p>команды выводят информацию о модулях, например:</p>
+<pre><code>$ java -p mods -d ru.example.testmodules 
+ru.example.testmodules file:///E:/blog/code_examples/mods/ru.example.testmodules.jar
+exports ru.example.testmodules requires java.base mandated
+</code></pre>
+<p><strong>java.base</strong> - специальный модуль, он автоматически добавляется как зависимость
+ко всем модулям без исключения.</p>
+<h3 id="section-2">Перечисление доступных модулей</h3>
+<pre><code>java --list-modules 
+</code></pre>
+<p>перечисляет стандартные модули java модули Всего в поставке из около 70</p>
+<pre><code>java -p mods --list-modules 
+</code></pre>
+<p>перечисляет стандартные модули java модули, и модули в папке mods</p>
+<h3 id="section-3">Максимально подробное описание</h3>
+<p>В команду запуска (см. команда запуска) добавить аргумент
+-–show-module-resolution</p>
+<pre><code>java \
+        --module-path mods \
+        --show-module-resolution \
+        --module ru.example.testmodules \
+         ru.example.testmodules.CommonJob
+</code></pre>
+<p>Для анализа вывода этой команды нужна еще одна статься TODO.</p>
+<h2 id="jar">Опции для команды jar</h2>
+<h3 id="section-4">Описание модуля:</h3>
+<p><code>jar -f mods/ru.example.testmodules.jar –d</code></p>
+<p><code>jar --file mods/ru.example.testmodules.jar --describe-module</code></p>
+<p>вывод</p>
+<pre><code>ru.example.testmodules jar:file:///E:/blog/code_examples/mods/ru.example.testmodules.jar/!module-info.class
+exports ru.example.testmodules
+requires java.base mandated
+</code></pre>
+<h2 id="jdeps">Команда jdeps</h2>
+<p>Дает инфо о зависимостях внутри модуля. Утилита смотрит в код, поэтому сообщает
+о том, какие зависимости реально используются, а не просто задекларированы.</p>
+<pre><code>jdeps -s mods/ru.example.testmodules.jar 
+jdeps -summary mods/ru.example.testmodules.jar
+</code></pre>
+<p>Если не использовать –summary/ -s то описание будет более подробно (какие пакеты
+используются в каком модуле).</p>
+<p>Если в модуле используются не только стандартные модули – то нужно указывать к
+ним путь, с помощью опции <strong>--module-path</strong>, для jdeps краткой формы этой опции
+не существует.</p>
+<pre><code>jdeps \
+--module-path mods \
+mods/ru.example.users.jar
+</code></pre>
+<h2 id="jmod">Команда jmod</h2>
+<p>JMOD – файл это файл java – модуля. Есть рекомендация для файлов java-модулей
+использовать jar – файлы, и только если используются нативные библиотеки (dll
+или so) – использовать JMOD – файлы.</p>
+<p>Режимы работы:</p>
+<table cellspacing = 0 border = 1>
+<thead>
+<tr border-bottom: 1px solid #ccc>
+<th><strong>Операция</strong></th>
+<th><strong>Описание</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr border-bottom: 1px solid #ccc>
+<td>create</td>
+<td>Создание JMOD – файла</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>extract</td>
+<td>Работает как unzip</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>describe</td>
+<td>Печатает всякие подробности, такие как requires</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>list</td>
+<td>Печатает все файлы изнутря JMOD – файла</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>hash</td>
+<td>Печатает hash</td>
+</tr>
+</tbody>
+</table>
+<p>Таблица некоторых полезных команд:</p>
+<table cellspacing = 0 border = 1>
+<thead>
+<tr>
+<th><strong>Описание</strong></th>
+<th><strong>Синтаксис</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Компиляция не модульного кода</td>
+<td>javac -cp classpath -d directory classesToCompile</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Запуск не модульного кода</td>
+<td>java -cp classpath package.className</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>-cp == -classpath == --class-path</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Компиляция модуля</td>
+<td>jvac --module-path moduleFolderName -d directory classesToCompileIncludingModuleInfo</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>--module-path == -p</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Запуск модуля</td>
+<td>java --module-path moduleFolderName --module moduleName/package.className</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>--module-path == -p --module == -m</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Описание модуля</td>
+<td>java --module-path moduleFolderName moduleName  jar--describe-module --file jarName --describe-module</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>--module-path == -p --describe-module == -d --file == -f</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Перечислить доступные модули</td>
+<td>java --list-modules java --module-path moduleFolderName --list-modules</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>--module-path == -p</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Посмотреть зависимости</td>
+<td>jdeps -summary --module-path moduleFolderName jarName</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>-summary == -s --module-path != -p (нельзя)</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td>Подробное описание модуля при запуске</td>
+<td>java \         --module-path mods \         --show-module-resolution \         --module module.name \          full.class.Name</td>
+</tr>
+<tr border-bottom: 1px solid #ccc>
+<td></td>
+<td>--module-path == -p --module == -m</td>
+</tr>
+</tbody>
+</table>
